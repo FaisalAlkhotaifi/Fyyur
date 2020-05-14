@@ -5,10 +5,10 @@ from wtforms.validators import DataRequired, AnyOf, URL
 
 class ShowForm(Form):
     artist_id = StringField(
-        'artist_id'
+        'artist_id', validators=[DataRequired()]
     )
     venue_id = StringField(
-        'venue_id'
+        'venue_id', validators=[DataRequired()]
     )
     start_time = DateTimeField(
         'start_time',
@@ -86,7 +86,7 @@ class VenueForm(Form):
         'phone'
     )
     image_link = StringField(
-        'image_link'
+        'image_link', validators=[DataRequired()]
     )
     genres = SelectMultipleField(
         # TODO implement enum restriction
@@ -114,8 +114,22 @@ class VenueForm(Form):
         ]
     )
     facebook_link = StringField(
-        'facebook_link', validators=[URL()]
+        'facebook_link', validators=[URL(), DataRequired()]
     )
+    website = StringField(
+        'website', validators=[URL(), DataRequired()]
+    )
+    seeking_talent = SelectField(
+        'seeking_talent', validators=[DataRequired()],
+         choices=[
+            'No',
+            'Yes',
+        ]
+    )
+    seeking_description = StringField(
+        'seeking_description'
+    )
+
 
 class ArtistForm(Form):
     name = StringField(
@@ -181,11 +195,10 @@ class ArtistForm(Form):
         ]
     )
     phone = StringField(
-        # TODO implement validation logic for state
         'phone'
     )
     image_link = StringField(
-        'image_link'
+        'image_link', validators=[DataRequired()]
     )
     genres = SelectMultipleField(
         # TODO implement enum restriction
@@ -215,6 +228,19 @@ class ArtistForm(Form):
     facebook_link = StringField(
         # TODO implement enum restriction
         'facebook_link', validators=[URL()]
+    )
+    website = StringField(
+        'website', validators=[URL()]
+    )
+    seeking_venue = SelectField(
+        'seeking_venue', validators=[DataRequired()],
+         choices=[
+            'No',
+            'Yes',
+        ]
+    )
+    seeking_description = StringField(
+        'seeking_description'
     )
 
 # TODO IMPLEMENT NEW ARTIST FORM AND NEW SHOW FORM
