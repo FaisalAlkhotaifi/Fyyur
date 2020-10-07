@@ -30,57 +30,25 @@ migrate = Migrate(app, db)
 #----------------------------------------------------------------------------#
 
 class Venue(db.Model):
-  __tablename__ = 'Venue'
+    __tablename__ = 'Venue'
 
-  id = db.Column(db.Integer, primary_key=True)
-  name = db.Column(db.String)
-  city = db.Column(db.String(120))
-  state = db.Column(db.String(120))
-  address = db.Column(db.String(120))
-  phone = db.Column(db.String(120))
-  image_link = db.Column(db.String(500))
-  facebook_link = db.Column(db.String(120))
-  genres = db.Column(db.ARRAY(db.String))
-  website = db.Column(db.String)
-  seeking_talent = db.Column(db.Boolean, nullable=False, default=False)
-  seeking_description = db.Column(db.String)
-  date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-  date_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    city = db.Column(db.String(120))
+    state = db.Column(db.String(120))
+    address = db.Column(db.String(120))
+    phone = db.Column(db.String(120))
+    image_link = db.Column(db.String(500))
+    facebook_link = db.Column(db.String(120))
+    genres = db.Column(db.ARRAY(db.String))
+    website = db.Column(db.String)
+    seeking_talent = db.Column(db.Boolean, nullable=False, default=False)
+    seeking_description = db.Column(db.String)
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    date_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-  show_list = db.relationship('Show', backref='venue', lazy=True)
-
-  def exhaustive_format(self):
-    past_shows = Show.past_show_venue(self.id)
-    upcoming_shows = Show.upcoming_show_venue(self.id)
-
-    return {
-      'id': self.id,
-      'name': self.name,
-      'genres': self.genres,
-      'address': self.address,
-      'city': self.city,
-      'state': self.state,
-      'phone': self.phone,
-      'website': self.website,
-      'facebook_link': self.facebook_link,
-      'seeking_talent': self.seeking_talent,
-      'seeking_description': self.seeking_description,
-      'image_link': self.image_link,
-      'past_shows': [{
-          'artist_id': show.artist_id,
-          "artist_name": Artist.get_by_id(show.artist_id).name,
-          "artist_image_link": Artist.get_by_id(show.artist_id).image_link,
-          "start_time": show.start_time.strftime("%m/%d/%Y, %H:%M")
-      } for show in past_shows],
-      'upcoming_shows': [{
-          'artist_id': show.artist.id,
-          'artist_name': Artist.get_by_id(show.artist_id).name,
-          'artist_image_link': Artist.get_by_id(show.artist_id).image_link,
-          'start_time': show.start_time.strftime("%m/%d/%Y, %H:%M")
-      } for show in upcoming_shows],
-      'past_shows_count': len(past_shows),
-      'upcoming_shows_count': len(upcoming_shows)
-    }
+    show_list = db.relationship('Show', backref='venue', lazy=True)
+    
 
 class Artist(db.Model):
     __tablename__ = 'Artist'
@@ -100,26 +68,17 @@ class Artist(db.Model):
     date_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     show_list = db.relationship('Show', backref='artist', lazy=True)
-
     
 class Show(db.Model):
-  __tablename__ = 'Show'
+   __tablename__ = 'Show'
 
-  id = db.Column(db.Integer, primary_key=True)
-  start_time = db.Column(db.DateTime, nullable=False) 
-  date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-  date_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+   id = db.Column(db.Integer, primary_key=True)
+   start_time = db.Column(db.DateTime, nullable=False) 
+   date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+   date_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-  venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id', ondelete="CASCADE"))
-  artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id', ondelete='CASCADE'))
-
-  def past_show_venue(venue_id):
-    past_shows = Show.query.filter(Show.start_time < datetime.now(),Show.venue_id==venue_id).all()
-    return past_shows
-
-  def upcoming_show_venue(venue_id):
-    upcoming_shows = Show.query.filter(Show.start_time > datetime.now(),Show.venue_id==venue_id).all()
-    return upcoming_shows
+   venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id', ondelete="CASCADE"))
+   artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id', ondelete='CASCADE'))
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -147,27 +106,8 @@ def index():
 #  Venues
 #  ----------------------------------------------------------------
 
-
-
-
 @app.route('/venues')
 def venues():
-  result = Venue.query.distinct(Venue.city, Venue.state).all()
-
-  data = []
-
-  for r in result:
-    data.append({
-      "city": r.city,
-      "state": r.state
-    })
-
-  for d in data:
-    d["venues"] = [v.exhaustive_format() for v in Venue.query.filter_by(city=d["city"], state=d["state"]).all()]
-
-    for vv in d["venues"]:
-      print(Show.query.filter(Show.start_time < datetime.now(),Show.venue_id==vv['id']).count())
-
   venue_list = Venue.query.all()
   
   venue_data_groupedby_city = []
@@ -196,7 +136,7 @@ def venues():
     city_index = cities.index(venue.city)
     venue_data_groupedby_city[city_index]['venues'].append(venue_data)
 
-  return render_template('pages/venues.html', areas=data)
+  return render_template('pages/venues.html', areas=venue_data_groupedby_city)
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
